@@ -1,0 +1,141 @@
+<div class="cliente-container">
+  
+  <!-- Controles del Cliente (Buscador y Filtros de Tienda) -->
+  <div class="client-controls glassmorphism">
+    <div class="search-wrapper">
+      <span class="search-icon">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+      </span>
+      <input 
+        type="text" 
+        [formControl]="searchControl" 
+        placeholder="Buscar ropa, electrónica, joyería..."
+        class="client-search-input"
+      >
+    </div>
+    
+    <!-- Filtros Avanzados (Precio y Ordenamiento) -->
+    <div class="advanced-filters">
+      <div class="price-filter" [formGroup]="priceGroup">
+        <label>Precio:</label>
+        <div class="price-inputs">
+          <input type="number" formControlName="min" placeholder="Min (S/)" class="glass-input small-input-client">
+          <span>-</span>
+          <input type="number" formControlName="max" placeholder="Max (S/)" class="glass-input small-input-client">
+        </div>
+      </div>
+      
+      <div class="sort-filter">
+        <label>Ordenar por:</label>
+        <select [formControl]="sortControl" class="glass-input sort-select">
+          <option value="relevancia">Relevancia</option>
+          <option value="menor-mayor">Precio: Menor a Mayor</option>
+          <option value="mayor-menor">Precio: Mayor a Menor</option>
+          <option value="rating">Mejor Calificados</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Filtro de Categorías -->
+    <div class="client-categories" *ngIf="categorias$ | async as categorias">
+      <button 
+        *ngFor="let cat of categorias" 
+        class="cat-chip" 
+        [class.active]="categoriaControl.value === cat"
+        (click)="categoriaControl.setValue(cat)"
+      >
+        {{ cat | titlecase }}
+      </button>
+    </div>
+  </div>
+
+  <div class="products-header" *ngIf="filteredCatalogo$ | async as catalogo">
+    <span class="results-count">Mostrando {{ catalogo.length }} productos</span>
+  </div>
+
+  <div class="products-grid" *ngIf="filteredCatalogo$ | async as catalogo">
+    <div class="product-card glassmorphism" *ngFor="let product of catalogo">
+      <div class="product-image-container">
+        <img [src]="product.image" [alt]="product.title" class="product-image" loading="lazy">
+        <div class="category-badge">{{ product.category | titlecase }}</div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-title" [title]="product.title">{{ product.title }}</h3>
+        <p class="product-description">{{ product.description }}</p>
+        
+        <div class="pricing-container">
+          <ng-container *ngIf="product.precioFinal !== undefined && product.precioFinal !== null && product.precioFinal < product.price; else noDiscount">
+            <div class="price-block">
+              <span class="price-original crossed-out">S/ {{ product.price | number:'1.2-2' }}</span>
+              <span class="price-final highlight-price">S/ {{ product.precioFinal | number:'1.2-2' }}</span>
+            </div>
+            <div class="discount-badge" *ngIf="product.price > 0">
+              -{{ ((product.price - product.precioFinal) / product.price) * 100 | number:'1.0-0' }}%
+            </div>
+          </ng-container>
+          <ng-template #noDiscount>
+            <span class="price-standard">S/ {{ product.price | number:'1.2-2' }}</span>
+          </ng-template>
+        </div>
+        <button class="action-btn glass-btn outline-btn" (click)="openModal(product)">
+          <span class="btn-text">Ver Detalles</span>
+          <span class="btn-icon">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/></svg>
+          </span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Empty state handling -->
+    <div *ngIf="catalogo.length === 0" class="empty-state">
+      <div class="spinner" *ngIf="!searchControl.value && categoriaControl.value === 'Todas'"></div>
+      <p *ngIf="!searchControl.value && categoriaControl.value === 'Todas'">Cargando catálogo pesado...</p>
+      <p *ngIf="searchControl.value || categoriaControl.value !== 'Todas'">No se encontraron productos que coincidan con tu búsqueda.</p>
+    </div>
+  </div>
+
+  <!-- Product Details Modal (Pro Max UX) -->
+  <div class="modal-overlay" *ngIf="selectedProduct" (click)="closeModal()">
+    <div class="modal-content glassmorphism" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closeModal()">✕</button>
+      
+      <div class="modal-body">
+        <div class="modal-image-col">
+          <div class="modal-image-wrapper">
+            <img [src]="selectedProduct.image" [alt]="selectedProduct.title">
+          </div>
+        </div>
+        <div class="modal-info-col">
+          <div class="modal-badge">{{ selectedProduct.category | titlecase }}</div>
+          <h2 class="modal-title">{{ selectedProduct.title }}</h2>
+          
+          <div class="modal-rating">
+            <span class="stars">
+              <span *ngFor="let star of getRatingArray(selectedProduct.rating.rate)">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right:2px"><path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg>
+              </span>
+            </span>
+            <span class="rating-count">({{ selectedProduct.rating.count }} reseñas)</span>
+          </div>
+
+          <p class="modal-desc">{{ selectedProduct.description }}</p>
+          
+          <div class="modal-divider"></div>
+          
+          <div class="modal-price-area">
+            <div *ngIf="selectedProduct.precioFinal !== undefined && selectedProduct.precioFinal !== null && selectedProduct.precioFinal < selectedProduct.price; else modalNoDiscount">
+              <span class="modal-old-price">Precio regular: S/ {{ selectedProduct.price | number:'1.2-2' }}</span>
+              <div class="modal-new-price-wrapper">
+                <span class="modal-new-price">S/ {{ selectedProduct.precioFinal | number:'1.2-2' }}</span>
+                <span class="modal-discount-badge">-{{ ((selectedProduct.price - selectedProduct.precioFinal) / selectedProduct.price) * 100 | number:'1.0-0' }}% OFF</span>
+              </div>
+            </div>
+            <ng-template #modalNoDiscount>
+              <span class="modal-new-price">S/ {{ selectedProduct.price | number:'1.2-2' }}</span>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

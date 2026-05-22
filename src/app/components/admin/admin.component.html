@@ -1,0 +1,67 @@
+<div class="admin-dashboard">
+  <div class="admin-header glassmorphism">
+    <div class="admin-profile">
+      <div class="avatar">A</div>
+      <span>Administrador</span>
+    </div>
+    <div>
+      <h1 class="brand-title" style="font-size: 1.25rem;">Panel de Control</h1>
+      <p class="brand-subtitle">Descuentos en vivo</p>
+    </div>
+  </div>
+  
+  <div class="admin-grid">
+    <div class="admin-panel glassmorphism">
+      <h2 class="panel-title" style="font-size: 1.1rem;">Filtros y Descuentos</h2>
+      
+      <form [formGroup]="filterForm" class="filter-form-vertical">
+        <div class="form-group">
+          <label for="categoria">Categoría a Modificar</label>
+          <div class="select-wrapper">
+            <select id="categoria" formControlName="categoria" class="glass-input w-100">
+              <option *ngFor="let cat of categorias$ | async" [value]="cat">
+                {{ cat | titlecase }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="descuento">Porcentaje (%)</label>
+          <div class="range-wrapper">
+            <input 
+              type="range" 
+              id="descuento-range" 
+              formControlName="descuento" 
+              min="0" 
+              max="100"
+              class="glass-range"
+            >
+            <input 
+              type="number" 
+              id="descuento" 
+              formControlName="descuento" 
+              min="0" 
+              max="100"
+              class="glass-input small-input"
+            >
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="admin-stats glassmorphism">
+      <h2 class="panel-title" style="font-size: 1.1rem;">Estadísticas Rápidas</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value highlight">{{ filterForm.get('descuento')?.value || 0 }}%</div>
+          <div class="stat-label">Desc. Actual</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="font-size: 1.2rem;">{{ filterForm.get('categoria')?.value || 'Todas' | titlecase }}</div>
+          <div class="stat-label">Cat. Afectada</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
