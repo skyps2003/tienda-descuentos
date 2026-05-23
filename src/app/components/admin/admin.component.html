@@ -1,67 +1,276 @@
 <div class="admin-dashboard">
-  <div class="admin-header glassmorphism">
-    <div class="admin-profile">
-      <div class="avatar">A</div>
-      <span>Administrador</span>
+
+  <!-- ══════════════════════════════════════════════════════
+       GLOBAL SETTINGS HEADER
+  ══════════════════════════════════════════════════════ -->
+  <div class="sp surface" style="margin-bottom: var(--space-4); padding: var(--space-4); display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: var(--space-3)">
+      <span class="sp-icon sp-icon--blue">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </span>
+      <div>
+        <div style="font-weight: 600; font-size: 0.875rem; color: var(--text-primary); margin-bottom: 2px;">Apariencia</div>
+        <div style="font-size: 0.75rem; color: var(--text-secondary)">Ajuste global del sistema</div>
+      </div>
     </div>
-    <div>
-      <h1 class="brand-title" style="font-size: 1.25rem;">Panel de Control</h1>
-      <p class="brand-subtitle">Descuentos en vivo</p>
-    </div>
+
+    <label class="theme-switch" style="transform: scale(0.85); transform-origin: right center;">
+      <input class="theme-switch__checkbox" type="checkbox" [formControl]="themeControl" />
+      <div class="theme-switch__container">
+        <div class="theme-switch__clouds"></div>
+        <div class="theme-switch__stars-container">
+          <svg fill="none" viewBox="0 0 144 55" xmlns="http://www.w3.org/2000/svg">
+            <path fill="currentColor" d="M135.831 3.00688C135.055 3.85027 134.111 4.29946 133 4.35447C134.111 4.40947 135.055 4.85867 135.831 5.71123C136.607 6.55462 136.996 7.56303 136.996 8.72727C136.996 7.95722 137.172 7.25134 137.525 6.59129C137.886 5.93124 138.372 5.39954 138.98 5.00535C139.598 4.60199 140.268 4.39114 141 4.35447C139.88 4.2903 138.936 3.85027 138.16 3.00688C137.384 2.16348 136.996 1.16425 136.996 0C136.996 1.16425 136.607 2.16348 135.831 3.00688ZM31 23.3545C32.1114 23.2995 33.0551 22.8503 33.8313 22.0069C34.6075 21.1635 34.9956 20.1642 34.9956 19C34.9956 20.1642 35.3837 21.1635 36.1599 22.0069C36.9361 22.8503 37.8798 23.2903 39 23.3545C38.2679 23.3911 37.5976 23.602 36.9802 24.0053C36.3716 24.3995 35.8864 24.9312 35.5248 25.5913C35.172 26.2513 34.9956 26.9572 34.9956 27.7273C34.9956 26.563 34.6075 25.5546 33.8313 24.7112C33.0551 23.8587 32.1114 23.4095 31 23.3545ZM0 36.3545C1.11136 36.2995 2.05513 35.8503 2.83131 35.0069C3.6075 34.1635 3.99559 33.1642 3.99559 32C3.99559 33.1642 4.38368 34.1635 5.15987 35.0069C5.93605 35.8503 6.87982 36.2903 8 36.3545C7.26792 36.3911 6.59757 36.602 5.98015 37.0053C5.37155 37.3995 4.88644 37.9312 4.52481 38.5913C4.172 39.2513 3.99559 39.9572 3.99559 40.7273C3.99559 39.563 3.6075 38.5546 2.83131 37.7112C2.05513 36.8587 1.11136 36.4095 0 36.3545ZM56.8313 24.0069C56.0551 24.8503 55.1114 25.2995 54 25.3545C55.1114 25.4095 56.0551 25.8587 56.8313 26.7112C57.6075 27.5546 57.9956 28.563 57.9956 29.7273C57.9956 28.9572 58.172 28.2513 58.5248 27.5913C58.8864 26.9312 59.3716 26.3995 59.9802 26.0053C60.5976 25.602 61.2679 25.3911 62 25.3545C60.8798 25.2903 59.9361 24.8503 59.1599 24.0069C58.3837 23.1635 57.9956 22.1642 57.9956 21C57.9956 22.1642 57.6075 23.1635 56.8313 24.0069ZM81 25.3545C82.1114 25.2995 83.0551 24.8503 83.8313 24.0069C84.6075 23.1635 84.9956 22.1642 84.9956 21C84.9956 22.1642 85.3837 23.1635 86.1599 24.0069C86.9361 24.8503 87.8798 25.2903 89 25.3545C88.2679 25.3911 87.5976 25.602 86.9802 26.0053C86.3716 26.3995 85.8864 26.9312 85.5248 27.5913C85.172 28.2513 84.9956 28.9572 84.9956 29.7273C84.9956 28.563 84.6075 27.5546 83.8313 26.7112C83.0551 25.8587 82.1114 25.4095 81 25.3545ZM136 36.3545C137.111 36.2995 138.055 35.8503 138.831 35.0069C139.607 34.1635 139.996 33.1642 139.996 32C139.996 33.1642 140.384 34.1635 141.16 35.0069C141.936 35.8503 142.88 36.2903 144 36.3545C143.268 36.3911 142.598 36.602 141.98 37.0053C141.372 37.3995 140.886 37.9312 140.525 38.5913C140.172 39.2513 139.996 39.9572 139.996 40.7273C139.996 39.563 139.607 38.5546 138.831 37.7112C138.055 36.8587 137.111 36.4095 136 36.3545ZM101.831 49.0069C101.055 49.8503 100.111 50.2995 99 50.3545C100.111 50.4095 101.055 50.8587 101.831 51.7112C102.607 52.5546 102.996 53.563 102.996 54.7273C102.996 53.9572 103.172 53.2513 103.525 52.5913C103.886 51.9312 104.372 51.3995 104.98 51.0053C105.598 50.602 106.268 50.3911 107 50.3545C105.88 50.2903 104.936 49.8503 104.16 49.0069C103.384 48.1635 102.996 47.1642 102.996 46C102.996 47.1642 102.607 48.1635 101.831 49.0069Z" clip-rule="evenodd" fill-rule="evenodd"></path>
+          </svg>
+        </div>
+        <div class="theme-switch__circle-container">
+          <div class="theme-switch__sun-moon-container">
+            <div class="theme-switch__moon">
+              <div class="theme-switch__spot"></div>
+              <div class="theme-switch__spot"></div>
+              <div class="theme-switch__spot"></div>
+            </div>
+          </div>
+        </div>
+        <div class="theme-switch__shooting-star"></div>
+        <div class="theme-switch__shooting-star-2"></div>
+        <div class="theme-switch__meteor"></div>
+        <div class="theme-switch__stars-cluster">
+          <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        </div>
+        <div class="theme-switch__aurora"></div>
+        <div class="theme-switch__comets">
+          <div class="comet"></div><div class="comet"></div>
+        </div>
+      </div>
+    </label>
   </div>
   
-  <div class="admin-grid">
-    <div class="admin-panel glassmorphism">
-      <h2 class="panel-title" style="font-size: 1.1rem;">Filtros y Descuentos</h2>
-      
-      <form [formGroup]="filterForm" class="filter-form-vertical">
-        <div class="form-group">
-          <label for="categoria">Categoría a Modificar</label>
-          <div class="select-wrapper">
-            <select id="categoria" formControlName="categoria" class="glass-input w-100">
-              <option *ngFor="let cat of categorias$ | async" [value]="cat">
-                {{ cat | titlecase }}
-              </option>
-            </select>
-          </div>
-        </div>
+  <!-- Definitions for the SVG filters (hidden) -->
+  <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+    <defs>
+      <filter id="sketchy" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="turbulence" baseFrequency="0.035 0.042" numOctaves="4" result="noise" seed="42"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="4.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
+      <filter id="sketchy-sm" x="-18%" y="-18%" width="136%" height="136%">
+        <feTurbulence type="turbulence" baseFrequency="0.06" numOctaves="3" result="noise" seed="7"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
+    </defs>
+  </svg>
 
-        <div class="form-group">
-          <label for="descuento">Porcentaje (%)</label>
-          <div class="range-wrapper">
-            <input 
-              type="range" 
-              id="descuento-range" 
-              formControlName="descuento" 
-              min="0" 
-              max="100"
-              class="glass-range"
-            >
-            <input 
-              type="number" 
-              id="descuento" 
-              formControlName="descuento" 
-              min="0" 
-              max="100"
-              class="glass-input small-input"
-            >
-          </div>
-        </div>
-      </form>
+  <!-- ══════════════════════════════════════════════════════
+       PANEL A — DESCUENTOS
+  ══════════════════════════════════════════════════════ -->
+  <div class="sp surface" [class.is-collapsed]="!isPanelAOpen">
+
+    <!-- Header / Toggle -->
+    <div class="sp-header sp-header--clickable" (click)="isPanelAOpen = !isPanelAOpen">
+      <div class="sp-label-row">
+        <span class="sp-icon sp-icon--blue">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="5" x2="5" y2="19"></line><circle cx="6.5" cy="6.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle>
+          </svg>
+        </span>
+        <span class="sp-label">Descuentos</span>
+        <svg class="sp-chevron" [class.sp-chevron--open]="isPanelAOpen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <div class="sp-big-num">
+        {{ filterForm.get('descuento')?.value || 0 }}<span class="sp-big-unit">%</span>
+      </div>
     </div>
 
-    <div class="admin-stats glassmorphism">
-      <h2 class="panel-title" style="font-size: 1.1rem;">Estadísticas Rápidas</h2>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value highlight">{{ filterForm.get('descuento')?.value || 0 }}%</div>
-          <div class="stat-label">Desc. Actual</div>
+    <!-- Body -->
+    <div class="sp-content" *ngIf="isPanelAOpen">
+      <!-- Slider con fill azul -->
+      <form [formGroup]="filterForm" class="sp-body">
+        <input
+          type="range"
+          id="descuento-range"
+          formControlName="descuento"
+          min="0" max="100" step="1"
+          class="sp-slider"
+          [style.background]="getSliderBg(filterForm.get('descuento')?.value, 100, '#4E7CF6')"
+        >
+        <div class="sp-ticks">
+          <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
         </div>
-        <div class="stat-card">
-          <div class="stat-value" style="font-size: 1.2rem;">{{ filterForm.get('categoria')?.value || 'Todas' | titlecase }}</div>
-          <div class="stat-label">Cat. Afectada</div>
+
+        <!-- Categoría -->
+        <div class="form-field" style="margin-top:var(--space-5)">
+          <label for="categoria" class="form-label">Categoría afectada</label>
+          <select id="categoria" formControlName="categoria" class="field-input">
+            <option *ngFor="let cat of categorias$ | async" [value]="cat">{{ cat | titlecase }}</option>
+          </select>
+        </div>
+
+        <!-- Debounce Toggle -->
+        <div class="form-field" style="margin-top:var(--space-4)">
+          <label class="sp-mode" [class.sp-mode--on]="debounceControl.value" (click)="debounceControl.setValue(!debounceControl.value)">
+            <span class="sp-mode-dot" [class.sp-mode-dot--blue]="debounceControl.value" [class.sp-mode-dot--red]="!debounceControl.value"></span>
+            <span class="sp-mode-texts">
+              <span class="sp-mode-name">RxJS Debounce</span>
+              <span class="sp-mode-sub">{{ debounceControl.value ? '400ms retraso (Optimizado)' : '0ms retraso (Sobrecarga)' }}</span>
+            </span>
+            <span class="sp-mode-check" *ngIf="debounceControl.value">✓</span>
+          </label>
+        </div>
+
+        <!-- Worker / Main Toggle -->
+        <div class="form-field" style="margin-top:var(--space-4)">
+          <label class="sp-mode" [class.sp-mode--on]="modeControl.value === 'worker'" (click)="modeControl.setValue('worker')">
+            <input type="radio" [formControl]="modeControl" value="worker" class="mode-radio" style="display:none">
+            <span class="sp-mode-dot sp-mode-dot--blue"></span>
+            <span class="sp-mode-texts">
+              <span class="sp-mode-name">Web Worker</span>
+              <span class="sp-mode-sub">Hilo secundario · sin bloqueo</span>
+            </span>
+            <span class="sp-mode-check" *ngIf="modeControl.value === 'worker'">✓</span>
+          </label>
+          <label class="sp-mode" [class.sp-mode--on]="modeControl.value === 'main'" (click)="modeControl.setValue('main')" style="margin-top:var(--space-2)">
+            <input type="radio" [formControl]="modeControl" value="main" class="mode-radio" style="display:none">
+            <span class="sp-mode-dot sp-mode-dot--red"></span>
+            <span class="sp-mode-texts">
+              <span class="sp-mode-name">Hilo Principal</span>
+              <span class="sp-mode-sub">Main thread · bloquea UI</span>
+            </span>
+            <span class="sp-mode-check sp-mode-check--red" *ngIf="modeControl.value === 'main'">✓</span>
+          </label>
+        </div>
+
+      </form>
+
+      <!-- Stats row -->
+      <div class="sp-stats">
+        <div class="sp-stat">
+          <span class="sp-stat-val" style="color:var(--accent)">{{ filterForm.get('descuento')?.value || 0 }}%</span>
+          <span class="sp-stat-lbl">Activo</span>
+        </div>
+        <div class="sp-stat-sep"></div>
+        <div class="sp-stat">
+          <span class="sp-stat-val">{{ filterForm.get('categoria')?.value || 'Todas' | titlecase }}</span>
+          <span class="sp-stat-lbl">Categoría</span>
+        </div>
+        <div class="sp-stat-sep" *ngIf="processingTime !== null"></div>
+        <div class="sp-stat" *ngIf="processingTime !== null">
+          <span class="sp-stat-val"
+            [style.color]="lastMode === 'worker' ? 'var(--accent)' : 'var(--danger)'">
+            {{ processingTime }} ms
+          </span>
+          <span class="sp-stat-lbl">{{ lastMode === 'worker' ? 'Worker' : 'Main thread' }}</span>
+        </div>
+      </div>
+
+      <!-- Spinner -->
+      <div class="sp-processing" *ngIf="isProcessing">
+        <div class="processing-spinner"></div>
+        <span>Calculando en {{ modeControl.value === 'worker' ? 'Web Worker' : 'hilo principal' }}…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       PANEL B — CARGA & HILOS
+  ══════════════════════════════════════════════════════ -->
+  <div class="sp surface" [class.is-collapsed]="!isPanelBOpen">
+
+    <!-- Header / Toggle -->
+    <div class="sp-header sp-header--clickable" (click)="isPanelBOpen = !isPanelBOpen">
+      <div class="sp-label-row">
+        <span class="sp-icon sp-icon--purple">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line>
+          </svg>
+        </span>
+        <span class="sp-label">Carga &amp; Hilos</span>
+        <svg class="sp-chevron" [class.sp-chevron--open]="isPanelBOpen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <div class="sp-big-num sp-big-num--purple">
+        {{ (countControl.value || 200) | number }}<span class="sp-big-unit"> prod.</span>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="sp-content" *ngIf="isPanelBOpen">
+      <!-- Slider con fill morado -->
+      <div class="sp-body">
+        <input
+          type="range"
+          id="count-range"
+          [formControl]="countControl"
+          min="200" max="25000" step="200"
+          class="sp-slider sp-slider--purple"
+          [style.background]="getSliderBg(countControl.value, 25000, '#8B5CF6')"
+        >
+        <div class="sp-ticks">
+          <span>200</span><span>6K</span><span>12K</span><span>18K</span><span>25K</span>
+        </div>
+
+        <!-- Presets y Custom Input -->
+        <div class="sp-presets" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2);">
+          <button class="preset-btn" (click)="countControl.setValue(200)">200</button>
+          <button class="preset-btn" (click)="countControl.setValue(1000)">1 K</button>
+          <button class="preset-btn" (click)="countControl.setValue(5000)">5 K</button>
+          <button class="preset-btn" (click)="countControl.setValue(10000)">10 K</button>
+          <button class="preset-btn" (click)="countControl.setValue(25000)">25 K</button>
+          <input type="number" class="preset-input" [formControl]="countControl" placeholder="Personalizado" min="1" max="100000" title="Ingresa un número personalizado" style="width: 100%; height: auto; box-sizing: border-box; padding: 0.3rem 0.75rem; border-radius: 100px;">
+        </div>
+
+        <!-- Toggle modo -->
+        <div class="sp-mode-group">
+          <label class="sp-mode" [class.sp-mode--on]="modeControl.value === 'worker'" (click)="modeControl.setValue('worker')">
+            <input type="radio" [formControl]="modeControl" value="worker" class="mode-radio">
+            <span class="sp-mode-dot sp-mode-dot--blue"></span>
+            <span class="sp-mode-texts">
+              <span class="sp-mode-name">Web Worker</span>
+              <span class="sp-mode-sub">Hilo secundario · sin bloqueo</span>
+            </span>
+            <span class="sp-mode-check" *ngIf="modeControl.value === 'worker'">✓</span>
+          </label>
+
+          <label class="sp-mode" [class.sp-mode--on]="modeControl.value === 'main'" (click)="modeControl.setValue('main')">
+            <input type="radio" [formControl]="modeControl" value="main" class="mode-radio">
+            <span class="sp-mode-dot sp-mode-dot--red"></span>
+            <span class="sp-mode-texts">
+              <span class="sp-mode-name">Hilo Principal</span>
+              <span class="sp-mode-sub">Main thread · puede congelar</span>
+            </span>
+            <span class="sp-mode-check sp-mode-check--red" *ngIf="modeControl.value === 'main'">✓</span>
+          </label>
+        </div>
+
+        <!-- Botón cargar -->
+        <button class="sp-load-btn" (click)="cargarCatalogo()" [disabled]="isProcessing" id="btn-cargar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+          </svg>
+          {{ isProcessing ? 'Procesando…' : 'Cargar ' + ((countControl.value || 200) | number) + ' productos' }}
+        </button>
+
+        <!-- Resultados -->
+        <div class="sp-bench-row" *ngIf="loadTime !== null || processingTime !== null">
+          <div class="sp-bench-chip" *ngIf="loadTime !== null">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            Generación: <strong>{{ loadTime }} ms</strong>
+          </div>
+          <div class="sp-bench-chip"
+            [class.sp-bench-chip--worker]="lastMode==='worker'"
+            [class.sp-bench-chip--main]="lastMode==='main'"
+            *ngIf="processingTime !== null">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            {{ lastMode === 'worker' ? 'Worker' : 'Main' }}: <strong>{{ processingTime }} ms</strong>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
 </div>

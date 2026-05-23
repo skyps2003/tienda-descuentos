@@ -44,13 +44,18 @@ export class CatalogoService {
 
   // Carga el catálogo (en este caso mock, pero podría usar http.get() con Fetch/HttpClient real)
   private cargarCatalogo(): void {
-    const categoriasBase = ['electrónica', 'joyería', 'ropa de hombre', 'ropa de mujer'];
+    const categoriasBase = [
+      'electrónica', 'joyería', 'ropa de hombre', 'ropa de mujer',
+      'calzado', 'hogar', 'deportes', 'belleza', 'juguetes'
+    ];
     const mockProducts: Product[] = [];
 
     let idCounter = 1;
-    // Genera 200 productos (4 categorías × 50 productos) para simular un catálogo real
+    // Genera ~200 productos simulando un catálogo real
+    const itemsPerCategory = Math.ceil(200 / categoriasBase.length);
+
     for (const cat of categoriasBase) {
-      for (let i = 1; i <= 50; i++) {
+      for (let i = 1; i <= itemsPerCategory; i++) {
         mockProducts.push({
           id: idCounter++,
           title: `Producto de ${cat} ${i} - Calidad Premium`,
@@ -88,6 +93,38 @@ export class CatalogoService {
   // Esto hace que todos los componentes suscritos reciban automáticamente los nuevos datos
   public actualizarCatalogo(catalogoProcesado: Product[]): void {
     this.catalogoSubject.next(catalogoProcesado);
+  }
+
+  public recargarCatalogo(cantidad: number): void {
+    const categoriasBase = [
+      'electrónica', 'joyería', 'ropa de hombre', 'ropa de mujer',
+      'calzado', 'hogar', 'deportes', 'belleza', 'juguetes'
+    ];
+    const porCategoria = Math.ceil(cantidad / categoriasBase.length);
+    const mockProducts: Product[] = [];
+    let idCounter = 1;
+
+    for (const cat of categoriasBase) {
+      for (let i = 1; i <= porCategoria && mockProducts.length < cantidad; i++) {
+        mockProducts.push({
+          id: idCounter++,
+          title: `Producto de ${cat} ${i} — Calidad Premium`,
+          price: parseFloat((Math.random() * (500 - 10) + 10).toFixed(2)),
+          description: `Producto de la categoría ${cat}. Ideal para probar el rendimiento con grandes volúmenes de datos.`,
+          category: cat,
+          image: `https://picsum.photos/seed/${idCounter}/300/300`,
+          rating: {
+            rate: parseFloat((Math.random() * 5).toFixed(1)),
+            count: Math.floor(Math.random() * 500)
+          }
+        });
+      }
+    }
+
+    mockProducts.sort(() => Math.random() - 0.5);
+    this.catalogoOriginal = mockProducts;
+    this.catalogoSubject.next(mockProducts);
+    this.extraerCategorias(mockProducts);
   }
 
   // Retorna el catálogo original sin descuentos

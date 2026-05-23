@@ -26,6 +26,8 @@ export class ClienteComponent implements OnInit {
   public searchControl = new FormControl('');
   public categoriaControl = new FormControl('Todas');
   public sortControl = new FormControl('relevancia');
+  public viewControl = new FormControl('grid');
+  public onlyDiscountsControl = new FormControl(false);
   public priceGroup = new FormGroup({
     min: new FormControl<number | null>(null),
     max: new FormControl<number | null>(null)
@@ -46,6 +48,7 @@ export class ClienteComponent implements OnInit {
     const categoria$ = this.categoriaControl.valueChanges.pipe(startWith('Todas'));
     const sort$ = this.sortControl.valueChanges.pipe(startWith('relevancia'));
     const price$ = this.priceGroup.valueChanges.pipe(startWith({ min: null, max: null }));
+    const onlyDiscounts$ = this.onlyDiscountsControl.valueChanges.pipe(startWith(false));
 
     // combineLatest: espera a que todos los Observables emitan, luego combina valores
     // Actúa como un "listener" que ejecuta cuando CUALQUIER valor cambia
@@ -54,11 +57,17 @@ export class ClienteComponent implements OnInit {
       search$,
       categoria$,
       sort$,
-      price$
+      price$,
+      onlyDiscounts$
     ]).pipe(
-      // map: transformar [catálogo, búsqueda, categoría, ordenamiento, precio] → catálogo filtrado
-      map(([productos, searchTerm, categoria, sortOrder, priceRange]) => {
+      // map: transformar [catálogo, búsqueda, categoría, ordenamiento, precio, soloDescuentos] → catálogo filtrado
+      map(([productos, searchTerm, categoria, sortOrder, priceRange, onlyDiscounts]) => {
         let filtrados = productos;
+
+        // 0. Filtrar Solo Ofertas
+        if (onlyDiscounts) {
+          filtrados = filtrados.filter(p => p.precioFinal !== undefined && p.precioFinal !== null && p.precioFinal < p.price);
+        }
 
         // 1. Filtrar por Categoría
         if (categoria && categoria !== 'Todas') {
@@ -98,6 +107,15 @@ export class ClienteComponent implements OnInit {
     );
   }
 
+  // Resetea todos los filtros de búsqueda a sus valores iniciales
+  resetFilters(): void {
+    this.searchControl.setValue('');
+    this.categoriaControl.setValue('Todas');
+    this.sortControl.setValue('relevancia');
+    this.onlyDiscountsControl.setValue(false);
+    this.priceGroup.setValue({ min: null, max: null });
+  }
+
   // Modal: abre detalle del producto
   openModal(product: Product): void {
     this.selectedProduct = product;
@@ -111,5 +129,9 @@ export class ClienteComponent implements OnInit {
 
   getRatingArray(rate: number): number[] {
     return Array(Math.round(rate)).fill(0);
+  }
+
+  isStarFilled(rate: number, index: number): boolean {
+    return index <= Math.round(rate);
   }
 }

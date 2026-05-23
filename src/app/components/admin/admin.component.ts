@@ -1,17 +1,9 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
-// ==========================================
-// OBSERVABLES (RxJS): Patrón reactivo para datos asíncronos
-// ==========================================
-// debounceTime: espera 400ms antes de emitir cambios (optimización)
-// distinctUntilChanged: emite solo si el valor cambió
-// Subject: flujo manual de eventos
-// takeUntil: desuscribirse automáticamente (cleanup)
-// map: transforma datos en el pipeline
-// ==========================================
-import { debounceTime, distinctUntilChanged, Subject, takeUntil, map } from 'rxjs';
-import { CatalogoService } from '../../services/catalogo.service';
+import { debounceTime, distinctUntilChanged, Subject, takeUntil, timer } from 'rxjs';
+import { debounce } from 'rxjs/operators';
+import { CatalogoService, Product } from '../../services/catalogo.service';
 
 @Component({
   selector: 'app-admin',
@@ -23,77 +15,193 @@ import { CatalogoService } from '../../services/catalogo.service';
 export class AdminComponent implements OnInit, OnDestroy {
   private catalogoService = inject(CatalogoService);
 
-  // Formulario reactivo: vincula cambios de categoría/descuento
+  // Formulario de filtros (categoría + descuento)
   public filterForm = new FormGroup({
     categoria: new FormControl('Todas'),
     descuento: new FormControl(0)
   });
 
+  // ── Benchmark controls ─────────────────────────────────────
+  // Modo de procesamiento: 'worker' (hilo secundario) o 'main' (hilo principal)
+  public modeControl = new FormControl<'worker' | 'main'>('worker');
+  // Cantidad de productos a generar para el benchmark
+  public countControl = new FormControl<number>(200);
+  // Toggle para activar/desactivar el Debounce
+  public debounceControl = new FormControl<boolean>(true);
+  // Toggle para tema claro/oscuro (true = Modo Oscuro, false = Modo Claro)
+  public themeControl = new FormControl<boolean>(true);
+
+  // ── Accordion / Collapsible state ──────────────────────────
+  public isPanelAOpen = true;
+  public isPanelBOpen = false;
+
+  // ── Métricas de rendimiento ────────────────────────────────
+  public processingTime: number | null = null;      // ms del último descuento aplicado
+  public loadTime: number | null = null;            // ms de carga del catálogo
+  public isProcessing = false;
+  public lastMode: 'worker' | 'main' | null = null; // para mostrar qué modo se usó
+
+  private processingStart = 0;
   public categorias$ = this.catalogoService.categorias$;
-  // Worker: instancia del Thread secundario para procesamiento paralelo
+
+  // Worker: hilo secundario para procesamiento en paralelo
   private worker!: Worker;
-  // Subject para manejo limpio de suscripciones (unsubscribe automático)
   private destroy$ = new Subject<void>();
 
   constructor() {}
 
   ngOnInit(): void {
-    // ==========================================
-    // CREACIÓN DEL WEB WORKER (Hilo secundario)
-    // ==========================================
-    // Crea una instancia de Worker si el navegador lo soporta
-    // El Worker corre en su propio hilo, sin bloquear la UI
+    // ── Crear Web Worker ────────────────────────────────────
     if (typeof Worker !== 'undefined') {
-      // new Worker(): instancia el hilo secundario con el archivo descuentos.worker.ts
       this.worker = new Worker(new URL('../../workers/descuentos.worker', import.meta.url));
-      // worker.onmessage: recibe datos procesados del Worker (comunicación Thread → Main)
+
+      // Cuando el Worker termina, captura el tiempo y actualiza el catálogo
       this.worker.onmessage = ({ data }) => {
-        // Actualiza el servicio reactivamente: los componentes se entaran automáticamente
+        const end = performance.now();
+        this.processingTime = parseFloat((end - this.processingStart).toFixed(3));
+        console.log(`%c[WORKER] Respuesta recibida. Tiempo total asíncrono: ${this.processingTime}ms`, 'color: #4E7CF6');
+        console.groupEnd();
+
+        this.isProcessing = false;
+        this.lastMode = 'worker';
         this.catalogoService.actualizarCatalogo(data);
       };
+
+      // Trigger inicial
+      setTimeout(() => this.triggerDescuento(), 0);
+
     } else {
-      console.warn('Web Workers are not supported in this environment.');
+      console.warn('Web Workers no soportados en este navegador.');
     }
 
-    // ==========================================
-    // PIPELINE REACTIVO: Observable chain
-    // ==========================================
-    // Cuando usuario cambia categoría/descuento:
+    // =========================================================================
+    // 🧠 PIPELINE REACTIVO CON DEBOUNCE (REBOTE) CONDICIONAL
+    // =========================================================================
+    // ¿Qué es el Debounce?
+    // Imagina que mueves el slider muy rápido del 0% al 50%. Sin debounce,
+    // Angular lanzaría 50 eventos seguidos, colapsando el navegador con cálculos.
+    // El Debounce actúa como un "portero": espera a que dejes de mover el slider
+    // (ej. durante 400ms) antes de dejar pasar el evento final.
+    //
+    // Aquí usamos RxJS para aplicar ese retraso de forma dinámica. Si está activo,
+    // espera 400ms de inactividad. Si se apaga, reacciona al instante a cada píxel.
+    // =========================================================================
+    
     this.filterForm.valueChanges
       .pipe(
-        // Esperar 400ms de inactividad antes de procesar (evitar exceso de Threads)
-        debounceTime(400),
-        // Solo procesar si realmente cambió algo
+        // debounce() permite decidir el tiempo dinámicamente según una condición
+        debounce(() => this.debounceControl.value ? timer(400) : timer(0)),
         distinctUntilChanged((prev, curr) =>
           prev.categoria === curr.categoria && prev.descuento === curr.descuento
         ),
-        // Desuscribirse automáticamente cuando se destruye el componente
         takeUntil(this.destroy$)
       )
-      // Suscribirse a cambios: enviar datos al Worker
-      .subscribe(value => {
-        if (this.worker) {
-          // Obtener catálogo original (sin descuentos aplicados)
-          const catalogoOriginal = this.catalogoService.getCatalogoOriginal();
-          // postMessage(): Comunicación Main Thread → Worker Thread
-          // El Worker recibe datos y los procesa en paralelo (sin bloquear UI)
-          this.worker.postMessage({
-            catalogoOriginal: catalogoOriginal,
-            porcentajeDescuento: value.descuento || 0,
-            categoriaSeleccionada: value.categoria || 'Todas'
-          });
+      .subscribe(() => {
+        console.log(`%c[RXJS] ⏳ Evento de formulario procesado (Debounce: ${this.debounceControl.value ? 'ON' : 'OFF'})`, 'color: #D97706');
+        this.triggerDescuento();
+      });
+
+    // Re-dispara cuando cambia el modo (worker ↔ main)
+    this.modeControl.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.triggerDescuento());
+
+    // Cambiar tema claro/oscuro
+    this.themeControl.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isDark => {
+        if (!isDark) {
+          document.body.classList.add('light-theme');
+        } else {
+          document.body.classList.remove('light-theme');
         }
       });
   }
 
-  // Cleanup: muy importante para evitar memory leaks
+  // ── Lógica central: decide cómo calcular el descuento ─────
+  private triggerDescuento(): void {
+    const catalogoOriginal = this.catalogoService.getCatalogoOriginal();
+    if (catalogoOriginal.length === 0) return;
+
+    const descuento = this.filterForm.value.descuento || 0;
+    const categoria = this.filterForm.value.categoria || 'Todas';
+
+    console.groupCollapsed(`%c⚡ Aplicando descuento: ${descuento}% en ${categoria}`, 'color: #8B5CF6; font-weight: bold;');
+    console.log(`Modo: ${(this.modeControl.value || 'worker').toUpperCase()} | Elementos: ${catalogoOriginal.length}`);
+
+    if (this.modeControl.value === 'worker' && this.worker) {
+      // ── Modo Web Worker (hilo secundario, no bloquea UI) ───
+      this.isProcessing = true;
+      this.processingStart = performance.now();
+      console.log('%c[MAIN] Enviando datos al Web Worker...', 'color: #4E7CF6');
+      this.worker.postMessage({ catalogoOriginal, porcentajeDescuento: descuento, categoriaSeleccionada: categoria });
+    } else {
+      // ── Modo Hilo Principal (bloquea UI durante el cálculo) ─
+      this.isProcessing = true;
+      console.log('%c[MAIN] Iniciando cálculo síncrono en Hilo Principal (Bloqueo UI esperado)...', 'color: #B85C50; font-weight: bold');
+      const start = performance.now();
+
+      // Cálculo SINCRÓNICO — bloquea el event loop intencionalmente
+      const resultado = this.calcularEnMainThread(catalogoOriginal, descuento, categoria);
+
+      const end = performance.now();
+      this.processingTime = parseFloat((end - start).toFixed(3));
+      console.log(`%c[MAIN] Cálculo terminado en ${this.processingTime}ms`, 'color: #B85C50');
+      console.groupEnd();
+      
+      this.isProcessing = false;
+      this.lastMode = 'main';
+      this.catalogoService.actualizarCatalogo(resultado);
+    }
+  }
+
+  // ── Cálculo en hilo principal (réplica del Worker, sin postMessage) ─
+  private calcularEnMainThread(catalog: Product[], discount: number, category: string): Product[] {
+    return catalog.map(producto => {
+      if (category === 'Todas' || producto.category === category) {
+        if (discount > 0) {
+          const precioFinal = parseFloat((producto.price * (1 - discount / 100)).toFixed(2));
+          return { ...producto, precioFinal: precioFinal > 0 ? precioFinal : 0 };
+        } else {
+          const { precioFinal, ...rest } = producto as any;
+          return rest as Product;
+        }
+      } else {
+        const { precioFinal, ...rest } = producto as any;
+        return rest as Product;
+      }
+    });
+  }
+
+  // ── Cargar catálogo con N productos ─────────────────────
+  cargarCatalogo(): void {
+    const cantidad = this.countControl.value || 200;
+    this.loadTime = null;
+    this.processingTime = null;
+
+    console.log(`%c[DATA] Solicitando generación de ${cantidad} productos...`, 'color: #3D9E8C; font-weight: bold');
+
+    const start = performance.now();
+    this.catalogoService.recargarCatalogo(cantidad);
+    const end = performance.now();
+
+    this.loadTime = parseFloat((end - start).toFixed(3));
+    console.log(`%c[DATA] Generación completada en ${this.loadTime}ms`, 'color: #3D9E8C');
+
+    // Re-aplica descuentos al nuevo catálogo
+    setTimeout(() => this.triggerDescuento(), 0);
+  }
+
+  // Calcula el background del slider con fill proporcional al valor
+  getSliderBg(value: number | null | undefined, max: number, fillColor: string): string {
+    const pct = (((value ?? 0) / max) * 100).toFixed(2);
+    return `linear-gradient(to right, ${fillColor} 0%, ${fillColor} ${pct}%, var(--surface-3) ${pct}%, var(--surface-3) 100%)`;
+  }
+
+  // Cleanup
   ngOnDestroy(): void {
-    // Completar el Subject para desuscribir todos los Observables
     this.destroy$.next();
     this.destroy$.complete();
-    // Terminar el Worker para liberar recursos del hilo secundario
-    if (this.worker) {
-      this.worker.terminate();
-    }
+    if (this.worker) this.worker.terminate();
   }
 }
